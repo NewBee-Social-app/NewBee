@@ -38,7 +38,6 @@ const setUser = (async (req, res, next)=>{
   app.post("/register", async(req,res,next)=>{
     try{
         const {username, password}= req.body;
-        console.log(password)
         const hash = await bcrypt.hash(password, 10);
         const user = await User.create({username,password:hash})
         const token = jwt.sign({username, id:user.id}, JWT_SECRET)
@@ -47,6 +46,27 @@ const setUser = (async (req, res, next)=>{
         next(error)
     }
        
+  })
+
+  //Post login
+  app.post('/login', async(req,res,next)=>{
+      try{
+          const {username, password} = req.body
+          const foundUser = await User.findOne({where:{username}})
+          if(!foundUser){
+              res.send(401)
+          }else{
+              const isMatch = await bcrypt.compare(password, foundUser.password)
+              if (!isMatch){
+                  res.sendStatus(401)
+              }else{
+                const token= jwt.sign(username, JWT_SECRET)
+          res.send({message: 'Welcome to new bee', token: token})
+              }
+            }
+            }catch(error){
+      next(error)
+    }
   })
 
 
