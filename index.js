@@ -21,9 +21,36 @@ app.get('/', async (req,res,next)=>{
         next(error)
     }
 })
+//authorization middleware
+const setUser = (async (req, res, next)=>{
+    const auth = req.header('Authorization')
+    if(!auth){
+      next()
+    }else{
+      const [, token] = auth.split(" ");
+      const payload = jwt.verify(token, JWT_SECRET);
+      req.user = payload;
+      next();
+    }
+  })
+
+  //POST REGISTER
+  app.post("/register", async(req,res,next)=>{
+    try{
+        const {username, password}= req.body;
+        console.log(password)
+        const hash = await bcrypt.hash(password, 10);
+        const user = await User.create({username,password:hash})
+        const token = jwt.sign({username, id:user.id}, JWT_SECRET)
+        res.send({message:"newbee registered", token: token})
+    }catch(error){
+        next(error)
+    }
+       
+  })
 
 
 app.listen(PORT, () =>{
-    // sequelize.sync({force: false})
+    sequelize.sync({force: false})
     console.log(`Newbee connection ready at http://localhost:${PORT}`);
 });
