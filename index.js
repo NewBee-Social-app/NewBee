@@ -68,6 +68,49 @@ const setUser = (async (req, res, next)=>{
       next(error)
     }
   })
+// get all vites once logged in
+  app.get('/vites', setUser, async(req,res, next)=>{
+   
+        if(req.user){
+            const vitesLogin = await Vite.findAll( req.user);
+            res.status(200).json(vitesLogin)
+        }else{
+            res.sendStatus(401)
+        }
+  })
+// get vite by id(once logged in)
+// create vite (once logged in )
+app.post('/vites', setUser, async (req, res, next)=>{
+    try{
+        if(!req.user){
+            res.send(401)
+        }else{
+            const {place, name, description} = req.body
+            const vite = await Vite.create({userId: req.user.id, place,name, description})
+            res.sendStatus(201)({place: vite.place, name: vite.name, description: vite.description})
+        }
+    }catch(error){
+        next(error)
+    }
+})
+// update vite (once logged in)
+// delete vite (once logged in)
+app.delete('/vites/:id', setUser, async(req, res, next)=>{
+    try{
+        const vite = await Vite.findByPk(req.params.id)
+        if(!req.user){
+            res.sendStatus(401)
+        }else if(req.user.id !== vite.userId){
+            res.sendStatus(401)
+        }else{
+            await vite.destroy()
+            res.sendStatus(204)
+        }
+    }catch(error){
+        next(error)
+    }
+})
+
 
 
 app.listen(PORT, () =>{
