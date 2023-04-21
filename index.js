@@ -29,6 +29,7 @@ const setUser = (async (req, res, next)=>{
     }else{
       const [, token] = auth.split(" ");
       const payload = jwt.verify(token, JWT_SECRET);
+      console.log(payload)
       req.user = payload;
       next();
     }
@@ -54,13 +55,13 @@ const setUser = (async (req, res, next)=>{
           const {username, password} = req.body
           const foundUser = await User.findOne({where:{username}})
           if(!foundUser){
-              res.send(401)
+              res.sendStatus(401)
           }else{
               const isMatch = await bcrypt.compare(password, foundUser.password)
               if (!isMatch){
                   res.sendStatus(401)
               }else{
-                const token= jwt.sign(username, JWT_SECRET)
+                const token= jwt.sign({username, id:foundUser.id},JWT_SECRET)
           res.send({message: 'Welcome to new bee', token: token})
               }
             }
@@ -68,32 +69,88 @@ const setUser = (async (req, res, next)=>{
       next(error)
     }
   })
+  //get all users
+  app.get('/users',  async(req,res, next)=>{
+        const usersall = await User.findAll(); 
+        res.send(usersall)
+    }
+)
 // get all vites once logged in
   app.get('/vites', setUser, async(req,res, next)=>{
    
         if(req.user){
-            const vitesLogin = await Vite.findAll( req.user);
+            const vitesLogin = await Vite.findAll();
+            console.log(req.user.id)
+            const vitesUser = await User.findByPk(req.user.id);
+            console.log(vitesUser)
             res.status(200).json(vitesLogin)
         }else{
             res.sendStatus(401)
         }
   })
 // get vite by id(once logged in)
+app.get('/vites/:id', setUser, async(req, res, next)=>{
+    try{
+        console.log(req.params.id)
+        const vite = await Vite.findByPk(req.params.id)
+        if(!req.user){
+            res.sendStatus(401)
+        }else if(req.user.id !== vite.userId){
+            res.sendStatus(401) // use this only if you want to see the ones you created
+        }else{
+           res.send({place: vite.place, name: vite.name, description: vite.description})
+        }
+    }catch(error){
+        next(error)
+    }
+})
 // create vite (once logged in )
 app.post('/vites', setUser, async (req, res, next)=>{
     try{
         if(!req.user){
             res.send(401)
         }else{
-            const {place, name, description} = req.body
-            const vite = await Vite.create({userId: req.user.id, place,name, description})
-            res.sendStatus(201)({place: vite.place, name: vite.name, description: vite.description})
+            const {place, name, description, date} = req.body
+            console.log(req.user.id)
+            const vite = await Vite.create({userId: req.user.id, place,name, description, date})
+            res.sendStatus(201)({place: vite.place, name: vite.name, description: vite.description, date: vite.date})
         }
     }catch(error){
         next(error)
     }
 })
 // update vite (once logged in)
+app.put('/vites/:id', setUser, async(req,res,next)=>{
+    try{
+        if(!req.user){
+            res.sendStatus(401)
+            }else{
+                    const {place, name, description, date} = req.body;
+                    const vite = await Vite.findByPk(req.params.id)
+                    if(!vite){
+                        res.sendStatus(404)
+                    }else if(vite.userId!== req.user.id){
+                        res.sendStatus(403)
+            }else{
+                await vite.update({place, name, description, date})
+                res.sendStatus(200).json({
+                    place: vite.place,
+                    name: vite.name,
+                    description: vite.description,
+                    date: vite.date
+                })
+            }
+            
+        }
+            
+    }catch(error){
+        next(error)
+    }
+})
+            //     const {place, name, description, date} = req.body;
+            //     const vite = await Vite.findByPk(req.params.id)
+            // const updateVite = await vite.update({place, name, description,date})
+            // res.sendStatus(201)({place: updateVite.place, name: updateVite.name, description: vite.description, date:vite.date})
 // delete vite (once logged in)
 app.delete('/vites/:id', setUser, async(req, res, next)=>{
     try{
