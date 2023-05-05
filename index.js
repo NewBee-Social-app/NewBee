@@ -30,11 +30,20 @@ const setUser = (async (req, res, next)=>{
     }else{
       const [, token] = auth.split(" ");
       const payload = jwt.verify(token, JWT_SECRET);
-    //   console.log(payload)
       req.user = payload;
       next();
     }
   })
+
+  // admin authorization middleware
+  const admin = (req,res,next)=>{
+    if(req.user && req.user.isAdmin){
+        
+        next()
+    }else{
+        res.sendStatus(401)
+    }
+  }
 
   //POST REGISTER
   app.post("/register", async(req,res,next)=>{
@@ -42,7 +51,7 @@ const setUser = (async (req, res, next)=>{
         const {username, password}= req.body;
         const hash = await bcrypt.hash(password, 10);
         const user = await User.create({username,password:hash})
-        const token = jwt.sign({username, id:user.id}, JWT_SECRET)
+        const token = jwt.sign({username, id:user.id, isAdmin: user.isAdmin}, JWT_SECRET)
         res.send({message:"newbee registered", token: token})
     }catch(error){
         next(error)
@@ -62,7 +71,7 @@ const setUser = (async (req, res, next)=>{
               if (!isMatch){
                   res.sendStatus(401)
               }else{
-                const token= jwt.sign({username, id:foundUser.id},JWT_SECRET)
+                const token= jwt.sign({username, id:foundUser.id, isAdmin: foundUser.isAdmin},JWT_SECRET)
           res.send({message: 'Welcome to new bee', token: token})
               }
             }
@@ -71,24 +80,26 @@ const setUser = (async (req, res, next)=>{
     }
   })
   //get all users
-  app.get('/users',  async(req,res, next)=>{
+  app.get('/users', setUser, async(req,res, next)=>{
         const usersall = await User.findAll(); 
         res.send(usersall)
     }
 )
 
 //Post users administrator permissions
-// app.post('/users', async (req, res, next) => {
-//     try {
-//       const {username, password} = req.body;
-//       const user = await User.create({username, password})
-//       res.send(user)
+app.post('/users', setUser, admin, async (req, res, next) => {
+    try {
+      const {username, password,isAdmin} = req.body;
+      const hash = await bcrypt.hash(password, 10)
+      const user = await User.create({username, password: hash, isAdmin:true})
+      const token = jwt.sign({username, id:user.id, isAdmin: user.isAdmin}, JWT_SECRET)
+      res.send({message: "user newbeeadmin registered ", token: token})
   
-//     } catch (error) {
-//       console.error(error);
-//       next(error)
-//     }
-//   });
+    } catch (error) {
+      console.error(error);
+      next(error)
+    }
+  });
 // get all vites once logged in
   app.get('/vites', setUser, async(req,res, next)=>{
    
@@ -143,7 +154,7 @@ app.put('/vites/:id', setUser, async(req,res,next)=>{
                     const vite = await Vite.findByPk(req.params.id)
                     if(!vite){
                         res.sendStatus(404)
-                    }else if(vite.userId!== req.user.id){
+                    }else if(vite.userId!== req.user.id && !req.user.isAdmin){
                         res.sendStatus(403)
             }else{
                 await vite.update({place, name, description, date})
@@ -165,10 +176,12 @@ app.put('/vites/:id', setUser, async(req,res,next)=>{
 app.delete('/vites/:id', setUser, async(req, res, next)=>{
     try{
         const vite = await Vite.findByPk(req.params.id)
-        if(!req.user){
+        if(!req.user){ 
             res.sendStatus(401)
-        }else if(req.user.id !== vite.userId){
+        }else if(req.user.id !== vite.userId && !req.user.isAdmin){
             res.sendStatus(401)
+        // }else if(!req.user.isAdmin){
+            // res.sendStatus(401)
         }else{
             await vite.destroy()
             res.sendStatus(204)
