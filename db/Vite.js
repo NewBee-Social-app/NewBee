@@ -1,4 +1,4 @@
-const {Sequelize, sequelize} = require('db')
+const {Sequelize, sequelize} = require('./db')
 
 const Vite = sequelize.define('vite', {
     place: Sequelize.STRING,
