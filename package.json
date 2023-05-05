@@ -20,5 +20,8 @@
     "jsonwebtoken": "^9.0.0",
     "sequelize": "^6.31.0",
     "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
