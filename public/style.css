@@ -1,0 +1,166 @@
+
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box; 
+         font-family: 'Poppins', sans-serif;
+         background: url(https://www.sickchirpse.com/wp-content/uploads/2021/12/Partying.jpg) no-repeat center center fixed;
+         -webkit-background-size: cover;
+         -moz-background-size:cover;
+         -o-background-size: cover;
+         background-size: cover;
+         
+    }
+    
+    .hero {
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        padding: 0 5%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    nav{
+        width:100%;
+        position:absolute;
+        top: 0;
+        left: 0;
+        padding: 20px 8%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    
+    }
+    
+    nav .logo{
+        width: 150px;;
+        border-radius: 75px;
+       
+    }
+    
+    nav ul li{
+     list-style: none;
+     display: inline-block;
+     margin-left:40px;
+    
+    }
+    
+    nav ul li a{
+        text-decoration: none;
+        color: white;
+        font-weight: 400;
+        font-size: 17px;
+    }
+    
+    nav ul li a,
+    nav ul li a:after,
+    nav ul li a:before {
+      transition: all .5s;
+    }
+    
+    nav ul li a:hover {
+        color: wheat;
+      }
+
+
+      .content{
+        text-align: center;
+        
+    
+    }
+    .content h1{
+        font-size: 100px;
+        color: whitesmoke;
+        font-weight: 600;
+        padding: 10px;
+    
+    }
+    .content  a{
+        text-decoration: none;
+        display: inline;
+        justify-content: space-between;
+        margin-left: 20px;
+        color:whitesmoke;
+        font-size: 30px;
+        border: 2px solid #e4c1d8ec;
+        border-radius: 50px;
+        padding: 10px;
+        background: #e4c1d8ec;
+        
+    }
+
+    form {
+        margin:10% auto 0 auto;
+        padding:30px;
+        width:400px;
+        height:auto;
+        overflow:hidden;
+        background: transparent;
+      background-size: cover;
+        border-radius:10px;
+    }
+    
+    form input  {
+        margin:15px 0;
+        padding:15px 10px;
+        width:100%;
+        outline:none;
+        border:1px solid #bbb;
+        border-radius:20px;
+        display:inline-block;
+        background: #e4c1d8ec;
+        -webkit-box-sizing:border-box;
+           -moz-box-sizing:border-box;
+                box-sizing:border-box;
+        -webkit-transition:0.2s ease all;
+           -moz-transition:0.2s ease all;
+            -ms-transition:0.2s ease all;
+             -o-transition:0.2s ease all;
+                transition:0.2s ease all;
+    }
+    
+    form input[type=text]:focus,
+    form input[type="text"]:focus {
+        border-color:#e4c1d8ec;
+    }
+    label{
+        color:white;
+        font-weight: 600;
+        background: transparent;
+        display: flex;
+        justify-content: center;
+    }
+    input[type=submit] {
+        padding:15px 50px;
+        width:auto;
+        background:white;
+        border:none;
+        font-weight: 600;
+        color:#e4c1d8ec;
+        cursor:pointer;
+        display:inline-block;
+        float:right;
+        clear:right;
+        -webkit-transition:0.2s ease all;
+           -moz-transition:0.2s ease all;
+            -ms-transition:0.2s ease all;
+             -o-transition:0.2s ease all;
+                transition:0.2s ease all;
+    }
+    
+    input[type=submit]:hover {
+        opacity:0.8;
+    }
+    
+    input[type="submit"]:active {
+        opacity:0.4;
+    }
+    
+    form h1{
+        background: transparent;
+        padding: 18px;
+        color: whitesmoke;
+    }
+
