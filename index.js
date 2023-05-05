@@ -11,14 +11,33 @@ const path =require('path')
 app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-app.use(express.static(path.join(__dirname,'style.css')));
+app.use(express.static("public"));
 
 
 app.get('/', async (req,res,next)=>{
     try{
-        res.sendFile(path.join(__dirname, 'index.html'));
+        res.sendFile(path.join(__dirname,"public", "index.html"));
     }catch(error){
         console.error(error)
+        next(error)
+    }
+})
+
+//get register
+app.get('/register',async(req,res,next)=>{
+    try{
+        res.sendFile(path.join(__dirname, 'public', 'register.html'))
+    }catch(error){
+        console.log(error)
+        next(error)
+    }
+})
+// get login
+app.get('/login',async(req,res,next)=>{
+    try{
+        res.sendFile(path.join(__dirname, 'public', 'login.html'))
+    }catch(error){
+        console.log(error)
         next(error)
     }
 })
@@ -180,8 +199,6 @@ app.delete('/vites/:id', setUser, async(req, res, next)=>{
             res.sendStatus(401)
         }else if(req.user.id !== vite.userId && !req.user.isAdmin){
             res.sendStatus(401)
-        // }else if(!req.user.isAdmin){
-            // res.sendStatus(401)
         }else{
             await vite.destroy()
             res.sendStatus(204)
