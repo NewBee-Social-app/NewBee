@@ -41,6 +41,7 @@ app.get('/login',async(req,res,next)=>{
         next(error)
     }
 })
+
 //authorization middleware
 const setUser = (async (req, res, next)=>{
     const auth = req.header('Authorization')
@@ -63,7 +64,18 @@ const setUser = (async (req, res, next)=>{
         res.sendStatus(401)
     }
   }
+//welcome page
+app.get('/welcome',async(req,res,next)=>{
+    
+    try{
+        res.sendFile(path.join(__dirname, 'public', 'welcome.html'))
+    }catch(error){
+        console.log(error)
+        next(error)
+    }
+    
 
+})
   //POST REGISTER
   app.post("/register", async(req,res,next)=>{
     try{
@@ -91,7 +103,9 @@ const setUser = (async (req, res, next)=>{
                   res.sendStatus(401)
               }else{
                 const token= jwt.sign({username, id:foundUser.id, isAdmin: foundUser.isAdmin},JWT_SECRET)
-          res.send({message: 'Welcome to new bee', token: token})
+        //   res.send({ message: 'Welcome to new bee', token: token})
+        res.redirect('/welcome')
+        
               }
             }
             }catch(error){
@@ -128,6 +142,7 @@ app.post('/users', setUser, admin, async (req, res, next) => {
             const vitesUser = await User.findByPk(req.user.id);
             // console.log(vitesUser)
             res.status(200).json(vitesLogin)
+            
         }else{
             res.sendStatus(401)
         }
