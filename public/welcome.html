@@ -15,15 +15,52 @@
            <ul>
                
                <li><a href="/about">ABOUT US</a></li>
+               <li><a href="/logout">LOGOUT</a></li>
            </ul>
         </nav>
         <div class="content">
             <h1>Welcome to your dashboard</h1>
-            <a href="/vites">See whats new in town</a>
-            <a  href="/Newvite">Create your event</a>
+            <a  id='seewhatsnew' href="/vites" onclick="handleSeewhatsNewClick(event)">See whats new in town</a>
+           
+            <a  href="create.html">Create your event</a>
             </div>
+            
+<script >
+     //func
+  function handleSeewhatsNewClick(event){
+    event.preventDefault()
+    const urlParams = new URLSearchParams(window.location.search)
+    const token = urlParams.get('token')
+    console.log('token:',token)
+    if(token){
+        fetch('http://localhost:3000/vites',{
+            method: 'GET',
+            headers:{
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response =>{
+            if(response.ok){
+                return response.json()
+            }else{
+                throw new Error('Request failed with status:' + response.status);
+            }
+        })
+        .then(data=>{
+            console.log(data)
+            
+            // window.location.href=`/vite.html?data=${encodeURIComponent(JSON.stringify(data))}`
+        })
+        .catch(error =>{
+            console.error(error)
+        })
+
+            }else{
+        console.log('Token not found')
         
-            <script src="index.js"></script>
+    }
+}
+</script> 
             
           </body>
         </body>
