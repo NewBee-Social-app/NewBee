@@ -7,6 +7,7 @@ const {PORT,JWT_SECRET} = process.env
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const path =require('path')
+
 //middleware
 app.use(cors())
 app.use(express.json());
@@ -51,6 +52,7 @@ const setUser = (async (req, res, next)=>{
       const [, token] = auth.split(" ");
       const payload = jwt.verify(token, JWT_SECRET);
       req.user = payload;
+      
       next();
     }
   })
@@ -64,11 +66,13 @@ const setUser = (async (req, res, next)=>{
         res.sendStatus(401)
     }
   }
+ 
 //welcome page
-app.get('/welcome',async(req,res,next)=>{
+app.get('/welcome',setUser,async(req,res,next)=>{
     
     try{
-        res.sendFile(path.join(__dirname, 'public', 'welcome.html'))
+        const {token} = req.query
+        res.sendFile(path.join(__dirname, 'public', 'welcome.html'),{token})
     }catch(error){
         console.log(error)
         next(error)
@@ -83,7 +87,9 @@ app.get('/welcome',async(req,res,next)=>{
         const hash = await bcrypt.hash(password, 10);
         const user = await User.create({username,password:hash})
         const token = jwt.sign({username, id:user.id, isAdmin: user.isAdmin}, JWT_SECRET)
+        
         res.send({message:"newbee registered", token: token})
+        // res.redirect('/welcome')
     }catch(error){
         next(error)
     }
@@ -104,12 +110,23 @@ app.get('/welcome',async(req,res,next)=>{
               }else{
                 const token= jwt.sign({username, id:foundUser.id, isAdmin: foundUser.isAdmin},JWT_SECRET)
         //   res.send({ message: 'Welcome to new bee', token: token})
-        res.redirect('/welcome')
+        
+        res.redirect('/welcome?token='+token)
         
               }
             }
             }catch(error){
       next(error)
+    }
+  })
+  //log out route
+  app.get('/logout', async(req,res, next)=>{
+    try{
+        req.user = null
+        res.clearCookie('token')
+        res.redirect('/')
+    }catch(error){
+        next(error)
     }
   })
   //get all users
@@ -135,22 +152,26 @@ app.post('/users', setUser, admin, async (req, res, next) => {
   });
 // get all vites once logged in
   app.get('/vites', setUser, async(req,res, next)=>{
-   
+        try{
+           
         if(req.user){
-            const vitesLogin = await Vite.findAll();
-            // console.log(req.user.id)
+            const vitesLogin = await Vite.findAll()
             const vitesUser = await User.findByPk(req.user.id);
-            // console.log(vitesUser)
             res.status(200).json(vitesLogin)
             
+            
         }else{
-            res.sendStatus(401)
+            res.sendStatus(401)   
         }
+        
+    }catch{
+        next(error)
+    }
   })
 // get vite by id(once logged in)
 app.get('/vites/:id', setUser, async(req, res, next)=>{
     try{
-        // console.log(req.params.id)
+       
         const vite = await Vite.findByPk(req.params.id)
         if(!req.user){
             res.sendStatus(401)
