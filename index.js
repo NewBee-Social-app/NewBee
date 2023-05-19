@@ -88,8 +88,8 @@ app.get('/welcome',setUser,async(req,res,next)=>{
         const user = await User.create({username,password:hash})
         const token = jwt.sign({username, id:user.id, isAdmin: user.isAdmin}, JWT_SECRET)
         
-        res.send({message:"newbee registered", token: token})
-        // res.redirect('/welcome')
+        // res.send({message:"newbee registered", token: token})
+        res.redirect('/welcome')
     }catch(error){
         next(error)
     }
